@@ -161,6 +161,38 @@
                                     <destFileName>minecraft.jar</destFileName>
                                     <file>http://s3.amazonaws.com/MinecraftDownload/minecraft.jar</file>
                                 </resource>
+                                <!-- Download the latest ModLoader if needed -->
+                                <resource>
+                                    <runIf>
+                                        {{
+                                            file = new File(project.basedir, "jars/bin/minecraft.jar")
+                                            java.util.jar.JarFile jar = new java.util.jar.JarFile(file);
+                                            entry = jar.getEntry("ModLoader.class")
+                                            if (entry == null) { return true; }
+                                            return false;
+                                        }}
+                                    </runIf>
+                                    <targetPath>${project.basedir}/jars/bin/ModLoader</targetPath>
+                                    <file>http://dl.dropbox.com/u/20629262/Latest/ModLoader.zip</file>
+                                    <destFileName>ModLoader.zip</destFileName>
+                                    <unpack>true</unpack>
+                                </resource>
+                                <!-- Copy ModLoader files into jar -->
+                                <resource>
+                                    <runIf>
+                                        {{
+                                            file = new File(project.basedir, "jars/bin/minecraft.jar")
+                                            java.util.jar.JarFile jar = new java.util.jar.JarFile(file);
+                                            entry = jar.getEntry("ModLoader.class")
+                                            if (entry == null) { return true; }
+                                            return false;
+                                        }}
+                                    </runIf>
+                                    <targetPath>${project.basedir}/jars/bin/minecraft.jar</targetPath>
+                                    <file>${project.basedir}/jars/bin/ModLoader/**.class</file>
+                                    <pack>true</pack>
+                                    <update>true</update>
+                                </resource>
                                 <!-- Download remaining dependencies -->
                                 <resource>
                                     <targetPath>${project.basedir}/lib</targetPath>
