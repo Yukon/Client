@@ -1,12 +1,17 @@
 package tc.oc.projectares.client;
 
-import net.minecraft.src.BaseMod;
+import net.minecraft.src.NetServerHandler;
 
-public final class ProjectAres extends BaseMod {
+public final class ProjectAres {
+    private static ProjectAres pa;
 
-    public void load() {}
-
-    public String getVersion() {
-        return "0.1";
+    public static ProjectAres get() {
+        return pa;
     }
+
+    public ProjectAres() {
+        pa = this;
+    }
+
+    public void onCustomPacket(NetServerHandler serverHandler, String channel, int length, byte[] data) {}
 }
