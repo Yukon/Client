@@ -669,6 +669,34 @@
                                     <goal>copy</goal>
                                 </goals>
                             </execution>
+                            <!-- Copy misc resources to make a complete jar -->
+                            <execution>
+                                <id>copy-resources</id>
+                                <configuration>
+                                    <verbose>false</verbose>
+                                    <resources>
+                                        <resource>
+                                            <runIf>
+                                                {{
+                                                    if (new File(project.basedir, "temp/bin/minecraft").isDirectory()) { return true; }
+                                                    return false;
+                                                }}
+                                            </runIf>
+                                            <directory>${project.basedir}/temp/bin/minecraft</directory>
+                                            <targetPath>${project.basedir}/target/classes</targetPath>
+                                            <excludes>
+                                              <exclude>META-INF</exclude>
+                                              <exclude>net/**</exclude>
+                                            </excludes>
+                                            <preservePath>true</preservePath>
+                                        </resource>
+                                    </resources>
+                                </configuration>
+                                <phase>prepare-package</phase>
+                                <goals>
+                                    <goal>copy</goal>
+                                </goals>
+                            </execution>
                             <!-- Copy compiled jar to user folder -->
                             <execution>
                                 <id>install-artifact</id>
@@ -747,6 +775,34 @@
                                             <directory>${project.basedir}/reobf/minecraft</directory>
                                             <targetPath>${project.basedir}/target/classes</targetPath>
                                             <include>**/*</include>
+                                            <preservePath>true</preservePath>
+                                        </resource>
+                                    </resources>
+                                </configuration>
+                                <phase>prepare-package</phase>
+                                <goals>
+                                    <goal>copy</goal>
+                                </goals>
+                            </execution>
+                            <!-- Copy misc resources to make a complete jar -->
+                            <execution>
+                                <id>copy-resources</id>
+                                <configuration>
+                                    <verbose>false</verbose>
+                                    <resources>
+                                        <resource>
+                                            <runIf>
+                                                {{
+                                                    if (new File(project.basedir, "temp/bin/minecraft").isDirectory()) { return true; }
+                                                    return false;
+                                                }}
+                                            </runIf>
+                                            <directory>${project.basedir}/temp/bin/minecraft</directory>
+                                            <targetPath>${project.basedir}/target/classes</targetPath>
+                                            <excludes>
+                                              <exclude>META-INF</exclude>
+                                              <exclude>net/**</exclude>
+                                            </excludes>
                                             <preservePath>true</preservePath>
                                         </resource>
                                     </resources>
