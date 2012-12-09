@@ -14,7 +14,6 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.GLU;
 
 public class GuiMainMenu extends GuiScreen {
-<<<<<<< HEAD
 
     /** The RNG used by the Main Menu Screen. */
     private static final Random rand = new Random();
