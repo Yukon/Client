@@ -631,7 +631,6 @@
                                             <directory>${project.basedir}/reobf/minecraft</directory>
                                             <targetPath>${project.basedir}/target/classes</targetPath>
                                             <include>**/*</include>
-                                            <preservePath>true</preservePath>
                                         </resource>
                                         <resource>
                                             <runIf>
@@ -645,7 +644,7 @@
                                             <include>**/*</include>
                                             <pack>true</pack>
                                         </resource>
-                                   </resources>
+                                    </resources>
                                 </configuration>
                                 <goals>
                                     <goal>copy</goal>
@@ -706,7 +705,6 @@
                                             <directory>${project.basedir}/reobf/minecraft</directory>
                                             <targetPath>${project.basedir}/target/classes</targetPath>
                                             <include>**/*</include>
-                                            <preservePath>true</preservePath>
                                         </resource>
                                         <resource>
                                             <runIf>
