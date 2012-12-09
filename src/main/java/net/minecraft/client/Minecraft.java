@@ -290,6 +290,8 @@ public abstract class Minecraft implements Runnable, IPlayerUsage {
     /** Profiler currently displayed in the debug screen pie chart */
     private String debugProfilerName = "root";
 
+    private boolean projectAresEnabled = false; // Project Ares
+
     public Minecraft(Canvas par1Canvas, MinecraftApplet par2MinecraftApplet, int par3, int par4, boolean par5) {
         StatList.func_75919_a();
         this.tempDisplayHeight = par4;
@@ -2165,4 +2167,14 @@ public abstract class Minecraft implements Runnable, IPlayerUsage {
     public boolean isFullScreen() {
         return this.fullscreen;
     }
+
+    // Project Ares start
+    public boolean isProjectAresEnabled() {
+        return this.projectAresEnabled;
+    }
+
+    public void setProjectAresEnabled(boolean projectAresEnabled) {
+        this.projectAresEnabled = projectAresEnabled;
+    }
+    // Project Ares end
 }

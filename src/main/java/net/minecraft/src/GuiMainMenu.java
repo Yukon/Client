@@ -382,7 +382,16 @@ public class GuiMainMenu extends GuiScreen {
         GL11.glScalef(var8, var8, var8);
         this.drawCenteredString(this.fontRenderer, this.splashText, 0, -8, 16776960);
         GL11.glPopMatrix();
-        String var9 = "Minecraft 1.4.5";
+
+        // Project Ares start
+        String var9;
+        if(this.mc.isProjectAresEnabled()) {
+            var9 = "Official Project Ares Client 1.4.5";
+        } else {
+            var9 = "Minecraft 1.4.5";
+        }
+        // Project Ares end
+
         if(this.mc.isDemo()) {
             var9 = var9 + " Demo";
         }
