@@ -988,13 +988,15 @@ public final class ModLoader {
             }
         }
 
-        if(var1.thePlayer != null && var1.currentScreen != null) {
+        // Project Ares - don't require the player to be in game
+        if(var1.currentScreen != null) {
             var4 = inGUIHooks.entrySet().iterator();
 
             while(var4.hasNext()) {
                 var5 = (Entry)var4.next();
 
-                if((clock != var14 || !(((Boolean)var5.getValue()).booleanValue() & var1.thePlayer.worldObj != null)) && !((BaseMod)var5.getKey()).onTickInGUI(var0, var1, var1.currentScreen)) {
+                // Project Ares - don't require the player to be in game
+                if((clock != var14 || !(((Boolean)var5.getValue()).booleanValue() & var1.thePlayer != null)) && !((BaseMod)var5.getKey()).onTickInGUI(var0, var1, var1.currentScreen)) {
                     var4.remove();
                 }
             }
