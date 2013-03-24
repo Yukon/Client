@@ -1,6 +1,6 @@
 ---
 language: java
-before_install: 'wget https://cdn.oc.tc/woodhouse && export DATE=`date +%Y-%m-%d` && export COMMIT=`git rev-parse HEAD`'
+before_install: 'wget https://cdn.oc.tc/woodhouse && chmod +x woodhouse && export DATE=`date +%Y-%m-%d` && export COMMIT=`git rev-parse HEAD`'
 install: mvn clean package -P mcp-final-unix
 after_success: 'rm -Rf target/classes && ./woodhouse publish --branch builds --message "Adding build files for $COMMIT" --auth-token-env AUTH_TOKEN ProjectAres/Client target:$DATE/$COMMIT'
 env:
