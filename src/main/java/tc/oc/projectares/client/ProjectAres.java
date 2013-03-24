@@ -11,7 +11,7 @@ public final class ProjectAres {
     private static ProjectAres pa;
 
     public boolean onPA = false;
-    public static final String serverDomain = "oc.tc";
+    public static final String SERVER_DOMAIN = "oc.tc";
 
     public static ProjectAres get() {
         return pa;
@@ -30,7 +30,7 @@ public final class ProjectAres {
     public void onTickInGame(float tick, Minecraft mc) {}
 
     public void onConnect(NetClientHandler handler) {
-        if (handler.getNetManager().getSocketAddress().toString().contains(serverDomain)) {
+        if (handler.getNetManager().getSocketAddress().toString().contains(SERVER_DOMAIN)) {
             onPA = true;
         }
     }
