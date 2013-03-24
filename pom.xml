@@ -6,17 +6,17 @@
     <name>Client</name>
     <groupId>tc.oc.projectares</groupId>
     <artifactId>client</artifactId>
-    <version>1.4.5-SNAPSHOT</version>
+    <version>1.5.1-SNAPSHOT</version>
     <url>https://oc.tc</url>
     <description>Official Project Ares client mod that provides useful information and features to players</description>
 
     <!-- Build properties -->
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <currentYear>2012</currentYear>
-        <minecraftVersion>1.4.5</minecraftVersion>
+        <currentYear>2013</currentYear>
+        <minecraftVersion>1.5.1</minecraftVersion>
         <lwjglVersion>2.4</lwjglVersion>
-        <mcpVersion>723</mcpVersion>
+        <mcpVersion>744</mcpVersion>
         <buildNumber>0</buildNumber>
     </properties>
 
@@ -139,7 +139,7 @@
                                     <useTrueZipForUnpack>false</useTrueZipForUnpack>
                                     <preservePath>true</preservePath>
                                     <zipEntries>
-                                        <zipEntry>conf/version.cfg</zipEntry>
+                                        <zipEntry>conf/**</zipEntry>
                                         <zipEntry>runtime/**</zipEntry>
                                     </zipEntries>
                                 </resource>
@@ -189,7 +189,10 @@
                                         }}
                                     </runIf>
                                     <targetPath>${project.basedir}/jars/bin/minecraft.jar</targetPath>
-                                    <file>${project.basedir}/jars/bin/ModLoader/**.class</file>
+                                    <directory>${project.basedir}/jars/bin/ModLoader</directory>
+                                    <includes>
+                                        <include>*.class</include>
+                                    </includes>
                                     <pack>true</pack>
                                     <update>true</update>
                                 </resource>
