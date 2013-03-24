@@ -44,7 +44,6 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
 public final class ModLoader {
-    private static final List animList = new LinkedList();
     private static final Map blockModels = new HashMap();
     private static final Map blockSpecialInv = new HashMap();
     private static final File cfgdir = new File(Minecraft.getMinecraftDir(), "/config/");
@@ -52,17 +51,13 @@ public final class ModLoader {
     public static Level cfgLoggingLevel = Level.FINER;
     private static Map classMap = null;
     private static long clock = 0L;
-    private static Field field_animList = null;
     private static Field field_armorList = null;
     private static Field field_modifiers = null;
     private static Field field_TileEntityRenderers = null;
     private static boolean hasInit = false;
-    private static int highestEntityId = 3000;
     private static final Map inGameHooks = new HashMap();
     private static final Map inGUIHooks = new HashMap();
     private static Minecraft instance = null;
-    private static int itemSpriteIndex = 0;
-    private static int itemSpritesLeft = 0;
     private static final Map keyList = new HashMap();
     private static String langPack = null;
     private static Map localizedStrings = new HashMap();
@@ -78,19 +73,14 @@ public final class ModLoader {
     private static final Map packetChannels = new HashMap();
     public static final Properties props = new Properties();
     private static BiomeGenBase[] standardBiomes;
-    private static int terrainSpriteIndex = 0;
-    private static int terrainSpritesLeft = 0;
-    private static String texPack = null;
-    private static boolean texturesAdded = false;
-    private static final boolean[] usedItemSprites = new boolean[256];
-    private static final boolean[] usedTerrainSprites = new boolean[256];
-    public static final String VERSION = "ModLoader 1.4.5";
+    public static final String VERSION = "ModLoader 1.5.1";
     private static NetClientHandler clientHandler = null;
     private static final List commandList = new LinkedList();
     private static final Map tradeItems = new HashMap();
     private static final Map containerGUIs = new HashMap();
     private static final Map trackers = new HashMap();
     private static final Map dispenserBehaviors = new HashMap();
+    private static final Map customTextures = new HashMap();
     private static SoundPool soundPoolSounds;
     private static SoundPool soundPoolStreaming;
     private static SoundPool soundPoolMusic;
@@ -148,7 +138,7 @@ public final class ModLoader {
         logger.finest("Finding fuel for " + var0);
         int var2 = 0;
 
-        for(Iterator var3 = modList.iterator(); var3.hasNext() && var2 == 0; var2 = ((BaseMod)var3.next()).addFuel(var0, var1)) {
+        for(Iterator var3 = modList.iterator(); var3.hasNext() && var2 == 0; var2 = ((BaseMod) var3.next()).addFuel(var0, var1)) {
             ;
         }
 
@@ -168,30 +158,14 @@ public final class ModLoader {
         Iterator var1 = modList.iterator();
 
         while(var1.hasNext()) {
-            BaseMod var2 = (BaseMod)var1.next();
+            BaseMod var2 = (BaseMod) var1.next();
             var2.addRenderer(var0);
         }
     }
 
-    public static void addAnimation(TextureFX var0) {
-        logger.finest("Adding animation " + var0.toString());
-        Iterator var1 = animList.iterator();
-
-        while(var1.hasNext()) {
-            TextureFX var2 = (TextureFX)var1.next();
-
-            if(var2.iconIndex == var0.iconIndex && var2.tileImage == var0.tileImage) {
-                animList.remove(var0);
-                break;
-            }
-        }
-
-        animList.add(var0);
-    }
-
     public static int addArmor(String var0) {
         try {
-            String[] var1 = (String[])((String[])field_armorList.get((Object)null));
+            String[] var1 = (String[])((String[]) field_armorList.get((Object) null));
             List var2 = Arrays.asList(var1);
             ArrayList var3 = new ArrayList();
             var3.addAll(var2);
@@ -201,7 +175,7 @@ public final class ModLoader {
             }
 
             int var4 = var3.indexOf(var0);
-            field_armorList.set((Object)null, var3.toArray(new String[0]));
+            field_armorList.set((Object) null, var3.toArray(new String[0]));
             return var4;
         } catch(IllegalArgumentException var5) {
             logger.throwing("ModLoader", "AddArmor", var5);
@@ -224,7 +198,7 @@ public final class ModLoader {
             var3.add(var0);
         }
 
-        GenLayerBiome.biomeArray = (BiomeGenBase[])((BiomeGenBase[])var3.toArray(new BiomeGenBase[0]));
+        GenLayerBiome.biomeArray = (BiomeGenBase[])((BiomeGenBase[]) var3.toArray(new BiomeGenBase[0]));
     }
 
     public static void addCommand(ICommand var0) {
@@ -239,18 +213,18 @@ public final class ModLoader {
         ICommandManager var1 = var0.getCommandManager();
 
         if(var1 instanceof CommandHandler) {
-            CommandHandler var2 = (CommandHandler)var1;
+            CommandHandler var2 = (CommandHandler) var1;
             Iterator var3 = commandList.iterator();
 
             while(var3.hasNext()) {
-                ICommand var4 = (ICommand)var3.next();
+                ICommand var4 = (ICommand) var3.next();
                 var2.registerCommand(var4);
             }
 
             var3 = dispenserBehaviors.entrySet().iterator();
 
             while(var3.hasNext()) {
-                Entry var5 = (Entry)var3.next();
+                Entry var5 = (Entry) var3.next();
                 BlockDispenser.dispenseBehaviorRegistry.putObject(var5.getKey(), var5.getValue());
             }
         }
@@ -264,37 +238,37 @@ public final class ModLoader {
         Object var3;
 
         if(localizedStrings.containsKey(var1)) {
-            var3 = (Map)localizedStrings.get(var1);
+            var3 = (Map) localizedStrings.get(var1);
         } else {
             var3 = new HashMap();
             localizedStrings.put(var1, var3);
         }
 
-        ((Map)var3).put(var0, var2);
+        ((Map) var3).put(var0, var2);
     }
 
     public static void addTrade(int var0, TradeEntry var1) {
         Object var2 = null;
 
         if(tradeItems.containsKey(Integer.valueOf(var0))) {
-            var2 = (List)tradeItems.get(Integer.valueOf(var0));
+            var2 = (List) tradeItems.get(Integer.valueOf(var0));
         } else {
             var2 = new LinkedList();
             tradeItems.put(Integer.valueOf(var0), var2);
         }
 
-        ((List)var2).add(var1);
+        ((List) var2).add(var1);
     }
 
     public static List getTrades(int var0) {
         if(var0 != -1) {
-            return tradeItems.containsKey(Integer.valueOf(var0)) ? Collections.unmodifiableList((List)tradeItems.get(Integer.valueOf(var0))) : null;
+            return tradeItems.containsKey(Integer.valueOf(var0)) ? Collections.unmodifiableList((List) tradeItems.get(Integer.valueOf(var0))) : null;
         } else {
             LinkedList var1 = new LinkedList();
             Iterator var2 = tradeItems.values().iterator();
 
             while(var2.hasNext()) {
-                List var3 = (List)var2.next();
+                List var3 = (List) var2.next();
                 var1.addAll(var3);
             }
 
@@ -327,7 +301,7 @@ public final class ModLoader {
             }
 
             setupProperties(var4);
-            BaseMod var5 = (BaseMod)var4.newInstance();
+            BaseMod var5 = (BaseMod) var4.newInstance();
 
             if(var5 != null) {
                 modList.add(var5);
@@ -351,20 +325,20 @@ public final class ModLoader {
         Exception var8;
 
         if(var0 instanceof Item) {
-            Item var4 = (Item)var0;
+            Item var4 = (Item) var0;
 
-            if(var4.getItemName() != null) {
-                var3 = var4.getItemName() + ".name";
+            if(var4.getUnlocalizedName() != null) {
+                var3 = var4.getUnlocalizedName() + ".name";
             }
         } else if(var0 instanceof Block) {
-            Block var6 = (Block)var0;
+            Block var6 = (Block) var0;
 
-            if(var6.getBlockName() != null) {
-                var3 = var6.getBlockName() + ".name";
+            if(var6.getUnlocalizedName() != null) {
+                var3 = var6.getUnlocalizedName() + ".name";
             }
         } else if(var0 instanceof ItemStack) {
-            ItemStack var7 = (ItemStack)var0;
-            String var5 = Item.itemsList[var7.itemID].getItemNameIS(var7);
+            ItemStack var7 = (ItemStack) var0;
+            String var5 = Item.itemsList[var7.itemID].getUnlocalizedName(var7);
 
             if(var5 != null) {
                 var3 = var5 + ".name";
@@ -384,53 +358,11 @@ public final class ModLoader {
         }
     }
 
-    public static int addOverride(String var0, String var1) {
-        try {
-            int var2 = getUniqueSpriteIndex(var0);
-            addOverride(var0, var1, var2);
-            return var2;
-        } catch(Throwable var3) {
-            logger.throwing("ModLoader", "addOverride", var3);
-            throwException(var3);
-            throw new RuntimeException(var3);
-        }
-    }
-
-    public static void addOverride(String var0, String var1, int var2) {
-        boolean var3 = true;
-        boolean var4 = false;
-        byte var6;
-        int var7;
-
-        if(var0.equals("/terrain.png")) {
-            var6 = 0;
-            var7 = terrainSpritesLeft;
-        } else {
-            if(!var0.equals("/gui/items.png")) {
-                return;
-            }
-
-            var6 = 1;
-            var7 = itemSpritesLeft;
-        }
-
-        System.out.println("Overriding " + var0 + " with " + var1 + " @ " + var2 + ". " + var7 + " left.");
-        logger.finer("addOverride(" + var0 + "," + var1 + "," + var2 + "). " + var7 + " left.");
-        Object var5 = (Map)overrides.get(Integer.valueOf(var6));
-
-        if(var5 == null) {
-            var5 = new HashMap();
-            overrides.put(Integer.valueOf(var6), var5);
-        }
-
-        ((Map)var5).put(var1, Integer.valueOf(var2));
-    }
-
-    public static void addRecipe(ItemStack var0, Object ... var1) {
+    public static void addRecipe(ItemStack var0, Object... var1) {
         CraftingManager.getInstance().addRecipe(var0, var1);
     }
 
-    public static void addShapelessRecipe(ItemStack var0, Object ... var1) {
+    public static void addShapelessRecipe(ItemStack var0, Object... var1) {
         CraftingManager.getInstance().addShapelessRecipe(var0, var1);
     }
 
@@ -439,7 +371,7 @@ public final class ModLoader {
     }
 
     public static void addSpawn(Class var0, int var1, int var2, int var3, EnumCreatureType var4) {
-        addSpawn(var0, var1, var2, var3, var4, (BiomeGenBase[])null);
+        addSpawn(var0, var1, var2, var3, var4, (BiomeGenBase[]) null);
     }
 
     public static void addSpawn(Class var0, int var1, int var2, int var3, EnumCreatureType var4, BiomeGenBase[] var5) {
@@ -460,7 +392,7 @@ public final class ModLoader {
                     Iterator var9 = var7.iterator();
 
                     while(var9.hasNext()) {
-                        SpawnListEntry var10 = (SpawnListEntry)var9.next();
+                        SpawnListEntry var10 = (SpawnListEntry) var9.next();
 
                         if(var10.entityClass == var0) {
                             var10.itemWeight = var1;
@@ -480,11 +412,11 @@ public final class ModLoader {
     }
 
     public static void addSpawn(String var0, int var1, int var2, int var3, EnumCreatureType var4) {
-        addSpawn(var0, var1, var2, var3, var4, (BiomeGenBase[])null);
+        addSpawn(var0, var1, var2, var3, var4, (BiomeGenBase[]) null);
     }
 
     public static void addSpawn(String var0, int var1, int var2, int var3, EnumCreatureType var4, BiomeGenBase[] var5) {
-        Class var6 = (Class)classMap.get(var0);
+        Class var6 = (Class) classMap.get(var0);
 
         if(var6 != null && EntityLiving.class.isAssignableFrom(var6)) {
             addSpawn(var6, var1, var2, var3, var4, var5);
@@ -492,7 +424,7 @@ public final class ModLoader {
     }
 
     public static void genericContainerRemoval(World var0, int var1, int var2, int var3) {
-        IInventory var4 = (IInventory)var0.getBlockTileEntity(var1, var2, var3);
+        IInventory var4 = (IInventory) var0.getBlockTileEntity(var1, var2, var3);
 
         if(var4 != null) {
             for(int var5 = 0; var5 < var4.getSizeInventory(); ++var5) {
@@ -511,18 +443,18 @@ public final class ModLoader {
                         }
 
                         var6.stackSize -= var13;
-                        var14 = new EntityItem(var0, (double)var1 + var7, (double)var2 + var9, (double)var3 + var11, new ItemStack(var6.itemID, var13, var6.getItemDamage()));
+                        var14 = new EntityItem(var0, (double) var1 + var7, (double) var2 + var9, (double) var3 + var11, new ItemStack(var6.itemID, var13, var6.getItemDamage()));
                         double var15 = 0.05D;
                         var14.motionX = var0.rand.nextGaussian() * var15;
                         var14.motionY = var0.rand.nextGaussian() * var15 + 0.2D;
                         var14.motionZ = var0.rand.nextGaussian() * var15;
 
                         if(var6.hasTagCompound()) {
-                            var14.item.setTagCompound((NBTTagCompound)var6.getTagCompound().copy());
+                            var14.getEntityItem().setTagCompound((NBTTagCompound) var6.getTagCompound().copy());
                         }
                     }
 
-                    var4.setInventorySlotContents(var5, (ItemStack)null);
+                    var4.setInventorySlotContents(var5, (ItemStack) null);
                 }
             }
         }
@@ -551,7 +483,7 @@ public final class ModLoader {
 
                 for(var3 = 0; var3 < var2.length; ++var3) {
                     if(var2[var3].getName().equals("Minecraft main thread")) {
-                        instance = (Minecraft)getPrivateValue(Thread.class, var2[var3], "target");
+                        instance = (Minecraft) getPrivateValue(Thread.class, var2[var3], "target");
                         break;
                     }
                 }
@@ -598,83 +530,16 @@ public final class ModLoader {
         return var2;
     }
 
-    public static int getUniqueEntityId() {
-        return highestEntityId++;
-    }
-
-    private static int getUniqueItemSpriteIndex() {
-        while(itemSpriteIndex < usedItemSprites.length) {
-            if(!usedItemSprites[itemSpriteIndex]) {
-                usedItemSprites[itemSpriteIndex] = true;
-                --itemSpritesLeft;
-                return itemSpriteIndex++;
-            }
-
-            ++itemSpriteIndex;
-        }
-
-        Exception var0 = new Exception("No more empty item sprite indices left!");
-        logger.throwing("ModLoader", "getUniqueItemSpriteIndex", var0);
-        throwException(var0);
-        return 0;
-    }
-
-    public static int getUniqueSpriteIndex(String var0) {
-        if(var0.equals("/gui/items.png")) {
-            return getUniqueItemSpriteIndex();
-        } else if(var0.equals("/terrain.png")) {
-            return getUniqueTerrainSpriteIndex();
-        } else {
-            Exception var1 = new Exception("No registry for this texture: " + var0);
-            logger.throwing("ModLoader", "getUniqueItemSpriteIndex", var1);
-            throwException(var1);
-            return 0;
-        }
-    }
-
-    private static int getUniqueTerrainSpriteIndex() {
-        while(terrainSpriteIndex < usedTerrainSprites.length) {
-            if(!usedTerrainSprites[terrainSpriteIndex]) {
-                usedTerrainSprites[terrainSpriteIndex] = true;
-                --terrainSpritesLeft;
-                return terrainSpriteIndex++;
-            }
-
-            ++terrainSpriteIndex;
-        }
-
-        Exception var0 = new Exception("No more empty terrain sprite indices left!");
-        logger.throwing("ModLoader", "getUniqueItemSpriteIndex", var0);
-        throwException(var0);
-        return 0;
-    }
-
     private static void init() {
         hasInit = true;
-        String var0 = "1111111111111111111111111111111111111101111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111000001111111111100000010111111110000000011111111000000000000110100000000000000011111000000000001111111111111111";
-        String var1 = "1111111111111111111111111100111111111111110111111111111110011111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111000001111111111111111111111111000001111111111100001111111111111111111";
-
-        for(int var2 = 0; var2 < 256; ++var2) {
-            usedItemSprites[var2] = var0.charAt(var2) == 49;
-
-            if(!usedItemSprites[var2]) {
-                ++itemSpritesLeft;
-            }
-
-            usedTerrainSprites[var2] = var1.charAt(var2) == 49;
-
-            if(!usedTerrainSprites[var2]) {
-                ++terrainSpritesLeft;
-            }
-        }
 
         try {
             instance = Minecraft.getMinecraft();
             instance.entityRenderer = new EntityRendererProxy(instance);
-            classMap = (Map)getPrivateValue(EntityList.class, (Object)null, 0);
-            soundPoolSounds = (SoundPool)getPrivateValue(SoundManager.class, instance.sndManager, 1);
-            soundPoolStreaming = (SoundPool)getPrivateValue(SoundManager.class, instance.sndManager, 2);
-            soundPoolMusic = (SoundPool)getPrivateValue(SoundManager.class, instance.sndManager, 3);
+            classMap = (Map) getPrivateValue(EntityList.class, (Object) null, 0);
+            soundPoolSounds = (SoundPool) getPrivateValue(SoundManager.class, instance.sndManager, 1);
+            soundPoolStreaming = (SoundPool) getPrivateValue(SoundManager.class, instance.sndManager, 2);
+            soundPoolMusic = (SoundPool) getPrivateValue(SoundManager.class, instance.sndManager, 3);
             field_modifiers = Field.class.getDeclaredField("modifiers");
             field_modifiers.setAccessible(true);
             field_TileEntityRenderers = TileEntityRenderer.class.getDeclaredFields()[0];
@@ -682,66 +547,66 @@ public final class ModLoader {
             field_armorList = RenderPlayer.class.getDeclaredFields()[3];
             field_modifiers.setInt(field_armorList, field_armorList.getModifiers() & -17);
             field_armorList.setAccessible(true);
-            field_animList = RenderEngine.class.getDeclaredFields()[6];
-            field_animList.setAccessible(true);
-            Field[] var15 = BiomeGenBase.class.getDeclaredFields();
-            LinkedList var3 = new LinkedList();
-            int var4 = 0;
+            Field[] var0 = BiomeGenBase.class.getDeclaredFields();
+            LinkedList var1 = new LinkedList();
 
-            while(true) {
-                if(var4 >= var15.length) {
-                    standardBiomes = (BiomeGenBase[])((BiomeGenBase[])var3.toArray(new BiomeGenBase[0]));
+            for(int var2 = 0; var2 < var0.length; ++var2) {
+                Class var3 = var0[var2].getType();
 
-                    try {
-                        method_RegisterTileEntity = TileEntity.class.getDeclaredMethod("a", new Class[] {Class.class, String.class});
-                    } catch(NoSuchMethodException var8) {
-                        method_RegisterTileEntity = TileEntity.class.getDeclaredMethod("addMapping", new Class[] {Class.class, String.class});
-                    }
+                if((var0[var2].getModifiers() & 8) != 0 && var3.isAssignableFrom(BiomeGenBase.class)) {
+                    BiomeGenBase var4 = (BiomeGenBase) var0[var2].get((Object) null);
 
-                    method_RegisterTileEntity.setAccessible(true);
-
-                    try {
-                        method_RegisterEntityID = EntityList.class.getDeclaredMethod("a", new Class[] {Class.class, String.class, Integer.TYPE});
-                    } catch(NoSuchMethodException var7) {
-                        method_RegisterEntityID = EntityList.class.getDeclaredMethod("addMapping", new Class[] {Class.class, String.class, Integer.TYPE});
-                    }
-
-                    method_RegisterEntityID.setAccessible(true);
-                    break;
-                }
-
-                Class var5 = var15[var4].getType();
-
-                if((var15[var4].getModifiers() & 8) != 0 && var5.isAssignableFrom(BiomeGenBase.class)) {
-                    BiomeGenBase var6 = (BiomeGenBase)var15[var4].get((Object)null);
-
-                    if(!(var6 instanceof BiomeGenHell) && !(var6 instanceof BiomeGenEnd)) {
-                        var3.add(var6);
+                    if(!(var4 instanceof BiomeGenHell) && !(var4 instanceof BiomeGenEnd)) {
+                        var1.add(var4);
                     }
                 }
-
-                ++var4;
             }
-        } catch(SecurityException var10) {
+
+            standardBiomes = (BiomeGenBase[])((BiomeGenBase[]) var1.toArray(new BiomeGenBase[0]));
+
+            try {
+                method_RegisterTileEntity = TileEntity.class.getDeclaredMethod("a", new Class[] {
+                    Class.class, String.class
+                });
+            } catch(NoSuchMethodException var6) {
+                method_RegisterTileEntity = TileEntity.class.getDeclaredMethod("addMapping", new Class[] {
+                    Class.class, String.class
+                });
+            }
+
+            method_RegisterTileEntity.setAccessible(true);
+
+            try {
+                method_RegisterEntityID = EntityList.class.getDeclaredMethod("a", new Class[] {
+                    Class.class, String.class, Integer.TYPE
+                });
+            } catch(NoSuchMethodException var5) {
+                method_RegisterEntityID = EntityList.class.getDeclaredMethod("addMapping", new Class[] {
+                    Class.class, String.class, Integer.TYPE
+                });
+            }
+
+            method_RegisterEntityID.setAccessible(true);
+        } catch(SecurityException var8) {
+            logger.throwing("ModLoader", "init", var8);
+            throwException(var8);
+            throw new RuntimeException(var8);
+        } catch(NoSuchFieldException var9) {
+            logger.throwing("ModLoader", "init", var9);
+            throwException(var9);
+            throw new RuntimeException(var9);
+        } catch(NoSuchMethodException var10) {
             logger.throwing("ModLoader", "init", var10);
             throwException(var10);
             throw new RuntimeException(var10);
-        } catch(NoSuchFieldException var11) {
+        } catch(IllegalArgumentException var11) {
             logger.throwing("ModLoader", "init", var11);
             throwException(var11);
             throw new RuntimeException(var11);
-        } catch(NoSuchMethodException var12) {
+        } catch(IllegalAccessException var12) {
             logger.throwing("ModLoader", "init", var12);
             throwException(var12);
             throw new RuntimeException(var12);
-        } catch(IllegalArgumentException var13) {
-            logger.throwing("ModLoader", "init", var13);
-            throwException(var13);
-            throw new RuntimeException(var13);
-        } catch(IllegalAccessException var14) {
-            logger.throwing("ModLoader", "init", var14);
-            throwException(var14);
-            throw new RuntimeException(var14);
         }
 
         try {
@@ -763,31 +628,31 @@ public final class ModLoader {
                 logger.addHandler(logHandler);
             }
 
-            logger.fine("ModLoader 1.4.5 Initializing...");
-            System.out.println("ModLoader 1.4.5 Initializing...");
-            File var16 = new File(ModLoader.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+            logger.fine("ModLoader 1.5.1 Initializing...");
+            System.out.println("ModLoader 1.5.1 Initializing...");
+            File var13 = new File(ModLoader.class.getProtectionDomain().getCodeSource().getLocation().toURI());
             modDir.mkdirs();
-            readFromClassPath(var16);
+            readFromClassPath(var13);
             readFromModFolder(modDir);
             sortModList();
-            Iterator var17 = modList.iterator();
+            Iterator var14 = modList.iterator();
 
-            while(var17.hasNext()) {
-                BaseMod var19 = (BaseMod)var17.next();
-                var19.load();
-                logger.fine("Mod Loaded: \"" + var19.toString() + "\"");
-                System.out.println("Mod Loaded: " + var19.toString());
+            while(var14.hasNext()) {
+                BaseMod var16 = (BaseMod) var14.next();
+                var16.load();
+                logger.fine("Mod Loaded: \"" + var16.toString() + "\"");
+                System.out.println("Mod Loaded: " + var16.toString());
 
-                if(!props.containsKey(var19.getClass().getSimpleName())) {
-                    props.setProperty(var19.getClass().getSimpleName(), "on");
+                if(!props.containsKey(var16.getClass().getSimpleName())) {
+                    props.setProperty(var16.getClass().getSimpleName(), "on");
                 }
             }
 
-            Iterator var20 = modList.iterator();
+            Iterator var17 = modList.iterator();
 
-            while(var20.hasNext()) {
-                BaseMod var18 = (BaseMod)var20.next();
-                var18.modsLoaded();
+            while(var17.hasNext()) {
+                BaseMod var15 = (BaseMod) var17.next();
+                var15.modsLoaded();
             }
 
             System.out.println("Done.");
@@ -797,15 +662,15 @@ public final class ModLoader {
             instance.gameSettings.loadOptions();
             initStats();
             saveConfig();
-        } catch(Throwable var9) {
-            logger.throwing("ModLoader", "init", var9);
-            throwException("ModLoader has failed to initialize.", var9);
+        } catch(Throwable var7) {
+            logger.throwing("ModLoader", "init", var7);
+            throwException("ModLoader has failed to initialize.", var7);
 
             if(logHandler != null) {
                 logHandler.close();
             }
 
-            throw new RuntimeException(var9);
+            throw new RuntimeException(var7);
         }
     }
 
@@ -815,7 +680,7 @@ public final class ModLoader {
 
         for(var0 = 0; var0 < Block.blocksList.length; ++var0) {
             if(!StatList.oneShotStats.containsKey(Integer.valueOf(16777216 + var0)) && Block.blocksList[var0] != null && Block.blocksList[var0].getEnableStats()) {
-                var1 = StatCollector.translateToLocalFormatted("stat.mineBlock", new Object[] {Block.blocksList[var0].translateBlockName()});
+                var1 = StatCollector.translateToLocalFormatted("stat.mineBlock", new Object[] {Block.blocksList[var0].getLocalizedName()});
                 StatList.mineBlockStatArray[var0] = (new StatCrafting(16777216 + var0, var1, var0)).registerStat();
                 StatList.objectMineStats.add(StatList.mineBlockStatArray[var0]);
             }
@@ -841,7 +706,7 @@ public final class ModLoader {
         Iterator var6 = CraftingManager.getInstance().getRecipeList().iterator();
 
         while(var6.hasNext()) {
-            IRecipe var2 = (IRecipe)var6.next();
+            IRecipe var2 = (IRecipe) var6.next();
 
             if(var2.getRecipeOutput() != null) {
                 var5.add(Integer.valueOf(var2.getRecipeOutput().itemID));
@@ -851,14 +716,14 @@ public final class ModLoader {
         var6 = FurnaceRecipes.smelting().getSmeltingList().values().iterator();
 
         while(var6.hasNext()) {
-            ItemStack var7 = (ItemStack)var6.next();
+            ItemStack var7 = (ItemStack) var6.next();
             var5.add(Integer.valueOf(var7.itemID));
         }
 
         Iterator var8 = var5.iterator();
 
         while(var8.hasNext()) {
-            int var3 = ((Integer)var8.next()).intValue();
+            int var3 = ((Integer) var8.next()).intValue();
 
             if(!StatList.oneShotStats.containsKey(Integer.valueOf(16842752 + var3)) && Item.itemsList[var3] != null) {
                 String var4 = StatCollector.translateToLocalFormatted("stat.craftItem", new Object[] {Item.itemsList[var3].getStatName()});
@@ -881,8 +746,9 @@ public final class ModLoader {
                 return false;
             }
 
-            var2 = (BaseMod)var1.next();
-        } while(!var0.contentEquals(var2.getName()));
+            var2 = (BaseMod) var1.next();
+        }
+        while (!var0.contentEquals(var2.getName()));
 
         return true;
     }
@@ -900,7 +766,7 @@ public final class ModLoader {
     }
 
     public static BufferedImage loadImage(RenderEngine var0, String var1) throws Exception {
-        TexturePackList var2 = (TexturePackList)getPrivateValue(RenderEngine.class, var0, 10);
+        TexturePackList var2 = (TexturePackList) getPrivateValue(RenderEngine.class, var0, 10);
         InputStream var3 = var2.getSelectedTexturePack().getResourceAsStream(var1);
 
         if(var3 == null) {
@@ -920,7 +786,7 @@ public final class ModLoader {
         Iterator var3 = modList.iterator();
 
         while(var3.hasNext()) {
-            BaseMod var2 = (BaseMod)var3.next();
+            BaseMod var2 = (BaseMod) var3.next();
             var2.onItemPickup(var0, var1);
         }
     }
@@ -935,16 +801,11 @@ public final class ModLoader {
             logger.fine("Initialized");
         }
 
-        if(texPack == null || var1.gameSettings.skin != texPack) {
-            texturesAdded = false;
-            texPack = var1.gameSettings.skin;
-        }
-
         if(langPack == null || StringTranslate.getInstance().getCurrentLanguage() != langPack) {
             Properties var2 = null;
 
             try {
-                var2 = (Properties)getPrivateValue(StringTranslate.class, StringTranslate.getInstance(), 1);
+                var2 = (Properties) getPrivateValue(StringTranslate.class, StringTranslate.getInstance(), 1);
             } catch(SecurityException var12) {
                 logger.throwing("ModLoader", "AddLocalization", var12);
                 throwException(var12);
@@ -957,18 +818,13 @@ public final class ModLoader {
 
             if(var2 != null) {
                 if(localizedStrings.containsKey("en_US")) {
-                    var2.putAll((Map)localizedStrings.get("en_US"));
+                    var2.putAll((Map) localizedStrings.get("en_US"));
                 }
 
                 if(!langPack.contentEquals("en_US") && localizedStrings.containsKey(langPack)) {
-                    var2.putAll((Map)localizedStrings.get(langPack));
+                    var2.putAll((Map) localizedStrings.get(langPack));
                 }
             }
-        }
-
-        if(!texturesAdded && var1.renderEngine != null) {
-            registerAllTextureOverrides(var1.renderEngine);
-            texturesAdded = true;
         }
 
         long var14 = 0L;
@@ -980,23 +836,21 @@ public final class ModLoader {
             var4 = inGameHooks.entrySet().iterator();
 
             while(var4.hasNext()) {
-                var5 = (Entry)var4.next();
+                var5 = (Entry) var4.next();
 
-                if((clock != var14 || !((Boolean)var5.getValue()).booleanValue()) && !((BaseMod)var5.getKey()).onTickInGame(var0, var1)) {
+                if((clock != var14 || !((Boolean) var5.getValue()).booleanValue()) && !((BaseMod) var5.getKey()).onTickInGame(var0, var1)) {
                     var4.remove();
                 }
             }
         }
 
-        // Project Ares - don't require the player to be in game
         if(var1.currentScreen != null) {
             var4 = inGUIHooks.entrySet().iterator();
 
             while(var4.hasNext()) {
-                var5 = (Entry)var4.next();
+                var5 = (Entry) var4.next();
 
-                // Project Ares - don't require the player to be in game
-                if((clock != var14 || !(((Boolean)var5.getValue()).booleanValue() & var1.thePlayer != null)) && !((BaseMod)var5.getKey()).onTickInGUI(var0, var1, var1.currentScreen)) {
+                if((clock != var14 || !((Boolean) var5.getValue()).booleanValue() || var1.thePlayer == null || var1.thePlayer.worldObj == null) && !((BaseMod) var5.getKey()).onTickInGUI(var0, var1, var1.currentScreen)) {
                     var4.remove();
                 }
             }
@@ -1006,12 +860,12 @@ public final class ModLoader {
             var4 = keyList.entrySet().iterator();
 
             while(var4.hasNext()) {
-                var5 = (Entry)var4.next();
-                Iterator var6 = ((Map)var5.getValue()).entrySet().iterator();
+                var5 = (Entry) var4.next();
+                Iterator var6 = ((Map) var5.getValue()).entrySet().iterator();
 
                 while(var6.hasNext()) {
-                    Entry var7 = (Entry)var6.next();
-                    int var8 = ((KeyBinding)var7.getKey()).keyCode;
+                    Entry var7 = (Entry) var6.next();
+                    int var8 = ((KeyBinding) var7.getKey()).keyCode;
                     boolean var9;
 
                     if(var8 < 0) {
@@ -1021,12 +875,12 @@ public final class ModLoader {
                         var9 = Keyboard.isKeyDown(var8);
                     }
 
-                    boolean[] var10 = (boolean[])((boolean[])var7.getValue());
+                    boolean[] var10 = (boolean[])((boolean[]) var7.getValue());
                     boolean var11 = var10[1];
                     var10[1] = var9;
 
                     if(var9 && (!var11 || var10[0])) {
-                        ((BaseMod)var5.getKey()).keyboardEvent((KeyBinding)var7.getKey());
+                        ((BaseMod) var5.getKey()).keyboardEvent((KeyBinding) var7.getKey());
                     }
                 }
             }
@@ -1062,11 +916,11 @@ public final class ModLoader {
         Random var4 = new Random(var3.getSeed());
         long var5 = var4.nextLong() / 2L * 2L + 1L;
         long var7 = var4.nextLong() / 2L * 2L + 1L;
-        var4.setSeed((long)var1 * var5 + (long)var2 * var7 ^ var3.getSeed());
+        var4.setSeed((long) var1 * var5 + (long) var2 * var7 ^ var3.getSeed());
         Iterator var9 = modList.iterator();
 
         while(var9.hasNext()) {
-            BaseMod var10 = (BaseMod)var9.next();
+            BaseMod var10 = (BaseMod) var9.next();
 
             if(var3.provider.isSurfaceWorld()) {
                 var10.generateSurface(var3, var4, var1 << 4, var2 << 4);
@@ -1142,7 +996,9 @@ public final class ModLoader {
 
     private static void readFromModFolder(File var0) throws IOException, IllegalArgumentException, IllegalAccessException, InvocationTargetException, SecurityException, NoSuchMethodException {
         ClassLoader var1 = Minecraft.class.getClassLoader();
-        Method var2 = URLClassLoader.class.getDeclaredMethod("addURL", new Class[] {URL.class});
+        Method var2 = URLClassLoader.class.getDeclaredMethod("addURL", new Class[] {
+            URL.class
+        });
         var2.setAccessible(true);
 
         if(!var0.isDirectory()) {
@@ -1242,7 +1098,7 @@ public final class ModLoader {
                 int var4 = var1.readInt();
                 int var5 = var1.readInt();
                 int var6 = var1.readInt();
-                byte var7 = (byte)var1.read();
+                byte var7 = (byte) var1.read();
                 EntityClientPlayerMP var8 = instance.thePlayer;
 
                 if(var8.dimension != var7) {
@@ -1250,7 +1106,7 @@ public final class ModLoader {
                 }
 
                 if(containerGUIs.containsKey(Integer.valueOf(var3))) {
-                    BaseMod var9 = (BaseMod)containerGUIs.get(Integer.valueOf(var3));
+                    BaseMod var9 = (BaseMod) containerGUIs.get(Integer.valueOf(var3));
 
                     if(var9 != null) {
                         GuiContainer var10 = var9.getContainerGUI(var8, var3, var4, var5, var6);
@@ -1267,7 +1123,7 @@ public final class ModLoader {
                 var11.printStackTrace();
             }
         } else if(packetChannels.containsKey(var0.channel)) {
-            BaseMod var12 = (BaseMod)packetChannels.get(var0.channel);
+            BaseMod var12 = (BaseMod) packetChannels.get(var0.channel);
 
             if(var12 != null) {
                 var12.clientCustomPayload(clientHandler, var0);
@@ -1277,7 +1133,7 @@ public final class ModLoader {
 
     public static void serverCustomPayload(NetServerHandler var0, Packet250CustomPayload var1) {
         if(packetChannels.containsKey(var1.channel)) {
-            BaseMod var2 = (BaseMod)packetChannels.get(var1.channel);
+            BaseMod var2 = (BaseMod) packetChannels.get(var1.channel);
 
             if(var2 != null) {
                 var2.serverCustomPayload(var0, var1);
@@ -1321,57 +1177,15 @@ public final class ModLoader {
         Iterator var3 = keyList.values().iterator();
 
         while(var3.hasNext()) {
-            Map var2 = (Map)var3.next();
+            Map var2 = (Map) var3.next();
             var1.addAll(var2.keySet());
         }
 
-        return (KeyBinding[])((KeyBinding[])var1.toArray(new KeyBinding[0]));
-    }
-
-    public static void registerAllTextureOverrides(RenderEngine var0) {
-        animList.clear();
-        Minecraft var1 = getMinecraftInstance();
-        Iterator var3 = modList.iterator();
-
-        while(var3.hasNext()) {
-            BaseMod var2 = (BaseMod)var3.next();
-            var2.registerAnimation(var1);
-        }
-
-        Iterator var4 = animList.iterator();
-
-        while(var4.hasNext()) {
-            TextureFX var14 = (TextureFX)var4.next();
-            var0.registerTextureFX(var14);
-        }
-
-        var4 = overrides.entrySet().iterator();
-
-        while(var4.hasNext()) {
-            Entry var5 = (Entry)var4.next();
-            Iterator var6 = ((Map)var5.getValue()).entrySet().iterator();
-
-            while(var6.hasNext()) {
-                Entry var7 = (Entry)var6.next();
-                String var8 = (String)var7.getKey();
-                int var9 = ((Integer)var7.getValue()).intValue();
-                int var10 = ((Integer)var5.getKey()).intValue();
-
-                try {
-                    BufferedImage var11 = loadImage(var0, var8);
-                    ModTextureStatic var12 = new ModTextureStatic(var9, var10, var11);
-                    var0.registerTextureFX(var12);
-                } catch(Exception var13) {
-                    logger.throwing("ModLoader", "RegisterAllTextureOverrides", var13);
-                    throwException(var13);
-                    throw new RuntimeException(var13);
-                }
-            }
-        }
+        return(KeyBinding[])((KeyBinding[]) var1.toArray(new KeyBinding[0]));
     }
 
     public static void registerBlock(Block var0) {
-        registerBlock(var0, (Class)null);
+        registerBlock(var0, (Class) null);
     }
 
     public static void registerBlock(Block var0, Class var1) {
@@ -1384,7 +1198,7 @@ public final class ModLoader {
             ItemBlock var3 = null;
 
             if(var1 != null) {
-                var3 = (ItemBlock)var1.getConstructor(new Class[] {Integer.TYPE}).newInstance(new Object[] {Integer.valueOf(var2 - 256)});
+                var3 = (ItemBlock) var1.getConstructor(new Class[] {Integer.TYPE}).newInstance(new Object[] {Integer.valueOf(var2 - 256)});
             } else {
                 var3 = new ItemBlock(var2 - 256);
             }
@@ -1415,7 +1229,7 @@ public final class ModLoader {
 
     public static void registerEntityID(Class var0, String var1, int var2) {
         try {
-            method_RegisterEntityID.invoke((Object)null, new Object[] {var0, var1, Integer.valueOf(var2)});
+            method_RegisterEntityID.invoke((Object) null, new Object[] {var0, var1, Integer.valueOf(var2)});
         } catch(IllegalArgumentException var4) {
             logger.throwing("ModLoader", "RegisterEntityID", var4);
             throwException(var4);
@@ -1434,14 +1248,14 @@ public final class ModLoader {
     }
 
     public static void registerKey(BaseMod var0, KeyBinding var1, boolean var2) {
-        Object var3 = (Map)keyList.get(var0);
+        Object var3 = (Map) keyList.get(var0);
 
         if(var3 == null) {
             var3 = new HashMap();
         }
 
         boolean[] var4 = new boolean[] {var2, false};
-        ((Map)var3).put(var1, var4);
+        ((Map) var3).put(var1, var4);
         keyList.put(var0, var3);
     }
 
@@ -1454,16 +1268,16 @@ public final class ModLoader {
     }
 
     public static void registerTileEntity(Class var0, String var1) {
-        registerTileEntity(var0, var1, (TileEntitySpecialRenderer)null);
+        registerTileEntity(var0, var1, (TileEntitySpecialRenderer) null);
     }
 
     public static void registerTileEntity(Class var0, String var1, TileEntitySpecialRenderer var2) {
         try {
-            method_RegisterTileEntity.invoke((Object)null, new Object[] {var0, var1});
+            method_RegisterTileEntity.invoke((Object) null, new Object[] {var0, var1});
 
             if(var2 != null) {
                 TileEntityRenderer var3 = TileEntityRenderer.instance;
-                Map var4 = (Map)field_TileEntityRenderers.get(var3);
+                Map var4 = (Map) field_TileEntityRenderers.get(var3);
                 var4.put(var0, var2);
                 var2.setTileEntityRenderer(var3);
             }
@@ -1489,11 +1303,11 @@ public final class ModLoader {
             var3.remove(var0);
         }
 
-        GenLayerBiome.biomeArray = (BiomeGenBase[])((BiomeGenBase[])var3.toArray(new BiomeGenBase[0]));
+        GenLayerBiome.biomeArray = (BiomeGenBase[])((BiomeGenBase[]) var3.toArray(new BiomeGenBase[0]));
     }
 
     public static void removeSpawn(Class var0, EnumCreatureType var1) {
-        removeSpawn(var0, var1, (BiomeGenBase[])null);
+        removeSpawn(var0, var1, (BiomeGenBase[]) null);
     }
 
     public static void removeSpawn(Class var0, EnumCreatureType var1, BiomeGenBase[] var2) {
@@ -1513,7 +1327,7 @@ public final class ModLoader {
                     Iterator var5 = var4.iterator();
 
                     while(var5.hasNext()) {
-                        SpawnListEntry var6 = (SpawnListEntry)var5.next();
+                        SpawnListEntry var6 = (SpawnListEntry) var5.next();
 
                         if(var6.entityClass == var0) {
                             var5.remove();
@@ -1525,11 +1339,11 @@ public final class ModLoader {
     }
 
     public static void removeSpawn(String var0, EnumCreatureType var1) {
-        removeSpawn(var0, var1, (BiomeGenBase[])null);
+        removeSpawn(var0, var1, (BiomeGenBase[]) null);
     }
 
     public static void removeSpawn(String var0, EnumCreatureType var1, BiomeGenBase[] var2) {
-        Class var3 = (Class)classMap.get(var0);
+        Class var3 = (Class) classMap.get(var0);
 
         if(var3 != null && EntityLiving.class.isAssignableFrom(var3)) {
             removeSpawn(var3, var1, var2);
@@ -1537,11 +1351,11 @@ public final class ModLoader {
     }
 
     public static boolean renderBlockIsItemFull3D(int var0) {
-        return !blockSpecialInv.containsKey(Integer.valueOf(var0)) ? var0 == 35 : ((Boolean)blockSpecialInv.get(Integer.valueOf(var0))).booleanValue();
+        return !blockSpecialInv.containsKey(Integer.valueOf(var0)) ? var0 == 35 : ((Boolean) blockSpecialInv.get(Integer.valueOf(var0))).booleanValue();
     }
 
     public static void renderInvBlock(RenderBlocks var0, Block var1, int var2, int var3) {
-        BaseMod var4 = (BaseMod)blockModels.get(Integer.valueOf(var3));
+        BaseMod var4 = (BaseMod) blockModels.get(Integer.valueOf(var3));
 
         if(var4 != null) {
             var4.renderInvBlock(var0, var1, var2, var3);
@@ -1549,7 +1363,7 @@ public final class ModLoader {
     }
 
     public static boolean renderWorldBlock(RenderBlocks var0, IBlockAccess var1, int var2, int var3, int var4, Block var5, int var6) {
-        BaseMod var7 = (BaseMod)blockModels.get(Integer.valueOf(var6));
+        BaseMod var7 = (BaseMod) blockModels.get(Integer.valueOf(var6));
         return var7 == null ? false : var7.renderWorldBlock(var0, var1, var2, var3, var4, var5, var6);
     }
 
@@ -1569,7 +1383,7 @@ public final class ModLoader {
         Iterator var2 = modList.iterator();
 
         while(var2.hasNext()) {
-            BaseMod var3 = (BaseMod)var2.next();
+            BaseMod var3 = (BaseMod) var2.next();
             var3.clientChat(var0);
         }
     }
@@ -1578,7 +1392,7 @@ public final class ModLoader {
         Iterator var3 = modList.iterator();
 
         while(var3.hasNext()) {
-            BaseMod var4 = (BaseMod)var3.next();
+            BaseMod var4 = (BaseMod) var3.next();
             var4.serverChat(var0, var1);
         }
     }
@@ -1591,11 +1405,11 @@ public final class ModLoader {
             var2.channel = "REGISTER";
             StringBuilder var3 = new StringBuilder();
             Iterator var4 = packetChannels.keySet().iterator();
-            var3.append((String)var4.next());
+            var3.append((String) var4.next());
 
             while(var4.hasNext()) {
                 var3.append("\u0000");
-                var3.append((String)var4.next());
+                var3.append((String) var4.next());
             }
 
             var2.data = var3.toString().getBytes(Charset.forName("UTF8"));
@@ -1606,7 +1420,7 @@ public final class ModLoader {
         Iterator var5 = modList.iterator();
 
         while(var5.hasNext()) {
-            BaseMod var6 = (BaseMod)var5.next();
+            BaseMod var6 = (BaseMod) var5.next();
             var6.clientConnect(var0);
         }
     }
@@ -1615,7 +1429,7 @@ public final class ModLoader {
         Iterator var0 = modList.iterator();
 
         while(var0.hasNext()) {
-            BaseMod var1 = (BaseMod)var0.next();
+            BaseMod var1 = (BaseMod) var0.next();
             var1.clientDisconnect(clientHandler);
         }
 
@@ -1707,7 +1521,7 @@ public final class ModLoader {
 
             if((var9.getModifiers() & 8) != 0 && var9.isAnnotationPresent(MLProp.class)) {
                 var1.add(var9);
-                Object var10 = var9.get((Object)null);
+                Object var10 = var9.get((Object) null);
                 var3 += var10.hashCode();
             }
         }
@@ -1716,13 +1530,13 @@ public final class ModLoader {
         Iterator var22 = var1.iterator();
 
         while(var22.hasNext()) {
-            Field var23 = (Field)var22.next();
+            Field var23 = (Field) var22.next();
 
             if((var23.getModifiers() & 8) != 0 && var23.isAnnotationPresent(MLProp.class)) {
                 Class var11 = var23.getType();
-                MLProp var12 = (MLProp)var23.getAnnotation(MLProp.class);
+                MLProp var12 = (MLProp) var23.getAnnotation(MLProp.class);
                 String var13 = var12.name().length() != 0 ? var12.name() : var23.getName();
-                Object var14 = var23.get((Object)null);
+                Object var14 = var23.get((Object) null);
                 StringBuilder var15 = new StringBuilder();
 
                 if(var12.min() != Double.NEGATIVE_INFINITY) {
@@ -1764,7 +1578,7 @@ public final class ModLoader {
 
                     if(var18 != null) {
                         if(var18 instanceof Number) {
-                            double var19 = ((Number)var18).doubleValue();
+                            double var19 = ((Number) var18).doubleValue();
 
                             if(var12.min() != Double.NEGATIVE_INFINITY && var19 < var12.min() || var12.max() != Double.POSITIVE_INFINITY && var19 > var12.max()) {
                                 continue;
@@ -1774,7 +1588,7 @@ public final class ModLoader {
                         logger.finer(var13 + " set to " + var18);
 
                         if(!var18.equals(var14)) {
-                            var23.set((Object)null, var18);
+                            var23.set((Object) null, var18);
                         }
                     }
                 } else {
@@ -1796,7 +1610,7 @@ public final class ModLoader {
         Iterator var2 = getLoadedMods().iterator();
 
         while(var2.hasNext()) {
-            BaseMod var1 = (BaseMod)var2.next();
+            BaseMod var1 = (BaseMod) var2.next();
             var0.put(var1.getClass().getSimpleName(), var1);
         }
 
@@ -1806,7 +1620,7 @@ public final class ModLoader {
             Iterator var4 = modList.iterator();
 
             while(var4.hasNext()) {
-                BaseMod var5 = (BaseMod)var4.next();
+                BaseMod var5 = (BaseMod) var4.next();
 
                 if(!var18.contains(var5)) {
                     String var6 = var5.getPriorities();
@@ -1821,7 +1635,9 @@ public final class ModLoader {
                             if(var6.indexOf(59) > 0) {
                                 var10 = var6.split(";");
                             } else {
-                                var10 = new String[] {var6};
+                                var10 = new String[] {
+                                    var6
+                                };
                             }
 
                             int var11 = 0;
@@ -1853,7 +1669,7 @@ public final class ModLoader {
                                                     throw new Exception(String.format("%s is missing dependency: %s", new Object[] {var5, var15}));
                                                 }
 
-                                                BaseMod var16 = (BaseMod)var0.get(var15);
+                                                BaseMod var16 = (BaseMod) var0.get(var15);
 
                                                 if(!var18.contains(var16)) {
                                                     break;
@@ -1910,7 +1726,7 @@ public final class ModLoader {
         Iterator var4 = modList.iterator();
 
         while(var4.hasNext()) {
-            BaseMod var3 = (BaseMod)var4.next();
+            BaseMod var3 = (BaseMod) var4.next();
             var3.takenFromCrafting(var0, var1, var2);
         }
     }
@@ -1919,7 +1735,7 @@ public final class ModLoader {
         Iterator var3 = modList.iterator();
 
         while(var3.hasNext()) {
-            BaseMod var2 = (BaseMod)var3.next();
+            BaseMod var2 = (BaseMod) var3.next();
             var2.takenFromFurnace(var0, var1);
         }
     }
@@ -1943,12 +1759,12 @@ public final class ModLoader {
         var0.append("Mods loaded: ");
         var0.append(getLoadedMods().size() + 1);
         var0.append('\n');
-        var0.append("ModLoader 1.4.5");
+        var0.append("ModLoader 1.5.1");
         var0.append('\n');
         Iterator var1 = getLoadedMods().iterator();
 
         while(var1.hasNext()) {
-            BaseMod var2 = (BaseMod)var1.next();
+            BaseMod var2 = (BaseMod) var1.next();
             var0.append(var2.getName());
             var0.append(' ');
             var0.append(var2.getVersion());
@@ -1956,5 +1772,13 @@ public final class ModLoader {
         }
 
         return var0.toString();
+    }
+
+    public static void addCustomAnimationLogic(String var0, TextureStitched var1) {
+        customTextures.put(var0, var1);
+    }
+
+    public static TextureStitched getCustomAnimationLogic(String var0) {
+        return !customTextures.containsKey(var0) ? null : (TextureStitched) customTextures.get(var0);
     }
 }
