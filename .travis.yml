@@ -1,0 +1,8 @@
+---
+language: java
+before_script: 'wget https://cdn.oc.tc/woodhouse && export DATE=`date +%Y-%m-%d` && export COMMIT=`git rev-parse HEAD`'
+script: mvn clean package -P mcp-final-unix
+after_success: 'rm -Rf target/classes && ./woodhouse publish --branch builds --message "Adding build files for $COMMIT" --auth-token-env AUTH_TOKEN ProjectAres/Client target:$DATE/$COMMIT'
+env:
+    global:
+    - secure: "JCLrGM0XjQQgDKDxHhZDcKu8Zf9axEVvI+i2/dTAElIj/zQ5JovEruoyrwMb\nktzAFLntC/Z48f2A+toxSXUZa/psG54z91utizrpcfF1rabRpwQ0bKRDnWvH\n3jdF14taqYR52ye6DoH6mMwC/n7zieaPFAPB48U6qlxItwIv8z0="
