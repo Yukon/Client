@@ -6,3 +6,6 @@ after_success: 'rm -Rf target/classes && ./woodhouse publish --branch builds --m
 env:
     global:
     - secure: "JCLrGM0XjQQgDKDxHhZDcKu8Zf9axEVvI+i2/dTAElIj/zQ5JovEruoyrwMb\nktzAFLntC/Z48f2A+toxSXUZa/psG54z91utizrpcfF1rabRpwQ0bKRDnWvH\n3jdF14taqYR52ye6DoH6mMwC/n7zieaPFAPB48U6qlxItwIv8z0="
+branches:
+    except:
+    - builds
